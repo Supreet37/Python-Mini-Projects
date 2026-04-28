@@ -1,0 +1,8 @@
+requests
+beautifulsoup4
+pyttsx3
+Pillow
+pyautogui
+psutil
+plyer
+selenium
