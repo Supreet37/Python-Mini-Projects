@@ -5,43 +5,42 @@ A comprehensive collection of **60+ Python scripts** for automation, web scrapin
 ## 📁 Project Structure
 Python-Mini-Projects/
 │
-├── apps/ 
-│ ├── calculate_age.py 
-│ ├── cli_todo.py 
-│ ├── emails_csv.py 
-│ └── image_watermarking.py 
+├── apps/
+│   ├── calculate_age.py
+│   ├── cli_todo.py
+│   ├── emails_csv.py
+│   └── image_watermarking.py
 │
-├── automation/ 
-│ ├── low_battery_notification.py 
-│ ├── screenshots_capture.py 
-│ └── download_folder_categorywise.py 
+├── automation/
+│   ├── low_battery_notification.py
+│   ├── screenshots_capture.py
+│   └── download_folder_categorywise.py
 │
-├── converters/ 
-│ ├── json_to_csv.py 
-│ ├── currency_converter.py 
-│ └── decimal_to_binary.py 
+├── converters/
+│   ├── json_to_csv.py
+│   ├── currency_converter.py
+│   └── decimal_to_binary.py
 │
-├── file_tools/ 
-│ ├── search.py 
-│ ├── compress_f.py 
-│ └── chunks.py 
+├── file_tools/
+│   ├── search.py
+│   ├── compress_f.py
+│   └── chunks.py
 │
-├── utilities/ 
-│ ├── password_generator.py 
-│ ├── stopwatch.py 
-│ ├── text_to_speech.py 
-│ ├── encrypt_decrypt.py 
-│ ├── ipaddress.py 
-│ ├── progress_Bar.py 
-│ └── passwordEjector.py 
+├── utilities/
+│   ├── password_generator.py
+│   ├── stopwatch.py
+│   ├── text_to_speech.py
+│   ├── encrypt_decrypt.py
+│   ├── ipaddress.py
+│   ├── progress_Bar.py
+│   └── passwordEjector.py
 │
 └── webScraping/
-├── fetch_links.py 
-├── Ratings.py
-├── comment.py 
-├── scrap_Download_images.py 
-└── snapshot.py 
-
+    ├── fetch_links.py
+    ├── Ratings.py
+    ├── comment.py
+    ├── scrap_Download_images.py
+    └── snapshot.py
 
 ---
 
