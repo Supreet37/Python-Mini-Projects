@@ -3,6 +3,8 @@
 A comprehensive collection of **60+ Python scripts** for automation, web scraping, file processing, encryption, and daily utilities. Perfect for learning Python or boosting productivity.
 
 ## 📁 Project Structure
+---
+```
 Python-Mini-Projects/
 │
 ├── apps/
@@ -41,7 +43,7 @@ Python-Mini-Projects/
     ├── comment.py
     ├── scrap_Download_images.py
     └── snapshot.py
-
+```
 ---
 
 ## 🚀 Projects by Category
