@@ -1,52 +1,51 @@
 import csv
-from email.message import EmailMessage
 import smtplib
+from email.message import EmailMessage
 
+# HOW TO USE:
+# 1. Create credentials.txt:
+#      Line 1: your Gmail address
+#      Line 2: your Gmail App Password (NOT your real password)
+#      Go to myaccount.google.com > Security > App Passwords to generate one
+# 2. Create emails.csv with one recipient email per line
+# 3. Run: python emails_csv.py
 
-def get_credentials(filepath):
+def get_credentials():
     with open("credentials.txt", "r") as f:
-        email_address = f.readline()
-        email_pass = f.readline()
-    return (email_address, email_pass)
-
-
-def login(email_address, email_pass, s):
-    s.ehlo()
-    # start TLS for security
-    s.starttls()
-    s.ehlo()
-    # Authentication
-    s.login(email_address, email_pass)
-    print("login")
-
+        lines = f.read().splitlines()
+    return lines[0].strip(), lines[1].strip()
 
 def send_mail():
-    s = smtplib.SMTP("smtp.gmail.com", 587)
-    email_address, email_pass = get_credentials("./credentials.txt")
-    login(email_address, email_pass, s)
+    email_address, email_pass = get_credentials()
 
-    # message to be sent
     subject = "Welcome to Python"
-    body = """Python is an interpreted, high-level,
-    general-purpose programming language.\n
-    Created by Guido van Rossum and first released in 1991,
-    Python's design philosophy emphasizes code readability\n
-    with its notable use of significant whitespace"""
+    body = (
+        "Python is an interpreted, high-level, general-purpose programming language.\n"
+        "Created by Guido van Rossum and first released in 1991.\n"
+        "Python's design philosophy emphasizes code readability."
+    )
 
-    message = EmailMessage()
-    message.set_content(body)
-    message['Subject'] = subject
+    with smtplib.SMTP("smtp.gmail.com", 587) as s:
+        s.ehlo()
+        s.starttls()
+        s.login(email_address, email_pass)
+        print("Logged in successfully.")
 
-    with open("emails.csv", newline="") as csvfile:
-        spamreader = csv.reader(csvfile, delimiter=" ", quotechar="|")
-        for email in spamreader:
-            s.send_message(email_address, email[0], message)
-            print("Send To " + email[0])
+        with open("emails.csv", newline="") as csvfile:
+            reader = csv.reader(csvfile)
+            for row in reader:
+                if not row:
+                    continue
+                recipient = row[0].strip()
+                msg = EmailMessage()
+                msg.set_content(body)
+                msg["Subject"] = subject
+                msg["From"] = email_address
+                msg["To"] = recipient
+                s.send_message(msg)
+                print(f"Sent to: {recipient}")
 
-    # terminating the session
-    s.quit()
-    print("sent")
-
+    print("All emails sent!")
 
 if __name__ == "__main__":
     send_mail()

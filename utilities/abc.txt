@@ -1,0 +1,2 @@
+﻿Hello! This is a test message for text to speech conversion.
+Python is awesome for automation and scripting.

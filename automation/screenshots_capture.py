@@ -4,37 +4,33 @@ import pyautogui
 import time
 
 parser = argparse.ArgumentParser()
-
-parser.add_argument("-p", "--path", help="absolute path to store screenshot.", default=r"./images")
-parser.add_argument("-t", "--type", help="h (in hour) or m (in minutes) or s (in seconds)", default='h')
-parser.add_argument("-f", "--frequency", help="frequency for taking screenshot per h/m/s.", default=1, type=int)
-
+parser.add_argument("-p", "--path", help="absolute path to store screenshot.", default="./images")
+parser.add_argument("-t", "--type", help="h (hour), m (minute), or s (second)", default='h')
+parser.add_argument("-f", "--frequency", help="screenshots per unit (e.g., 2 per hour)", default=1, type=int)
 args = parser.parse_args()
 
-
-sec = 0.
-
 if args.type == 'h':
-    sec = 60 * 60 / args.frequency
+    sec = 3600 / args.frequency
 elif args.type == 'm':
     sec = 60 / args.frequency
+elif args.type == 's':
+    sec = 1 / args.frequency
+else:
+    sec = 1
 
-if sec < 1.:
-    sec = 1.
+if sec < 0.5:
+    sec = 0.5
 
-
-if os.path.isdir(args.path) != True:
-    os.mkdir(args.path)
-
+if not os.path.isdir(args.path):
+    os.makedirs(args.path, exist_ok=True)
 
 try:
     while True:
         t = time.localtime()
-        current_time = time.strftime("%H_%M_%S", t)
-        file = current_time + ".jpg"
-        image = pyautogui.screenshot(os.path.join(args.path,file))
-        print(f"{file} saved successfully.\n")
+        current_time = time.strftime("%Y_%m_%d_%H_%M_%S", t)
+        file = current_time + ".png"
+        image = pyautogui.screenshot(os.path.join(args.path, file))
+        print(f"{file} saved successfully.")
         time.sleep(sec)
-
 except KeyboardInterrupt:
-    print("End of script by user interrupt")
+    print("Script stopped by user.")

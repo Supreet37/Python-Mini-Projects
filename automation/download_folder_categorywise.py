@@ -1,46 +1,46 @@
 import os
 import shutil
-os.chdir("E:\downloads")
-#print(os.getcwd())
 
-#check number of files in  directory
-files = os.listdir()
+def organize_downloads(source_dir, dest_dir):
+    if not os.path.exists(source_dir):
+        print(f"Source directory {source_dir} does not exist.")
+        return
 
-#list of extension (You can add more if you want)
-extentions = {
-    "images": [".jpg", ".png", ".jpeg", ".gif"],
-    "videos": [".mp4", ".mkv"],
-    "musics": [".mp3", ".wav"],
-    "zip": [".zip", ".tgz", ".rar", ".tar"],
-    "documents": [".pdf", ".docx", ".csv", ".xlsx", ".pptx", ".doc", ".ppt", ".xls"],
-    "setup": [".msi", ".exe"],
-    "programs": [".py", ".c", ".cpp", ".php", ".C", ".CPP"],
-    "design": [".xd", ".psd"]
+    os.chdir(source_dir)
+    files = os.listdir()
 
+    extensions = {
+        "images": [".jpg", ".png", ".jpeg", ".gif", ".bmp", ".svg"],
+        "videos": [".mp4", ".mkv", ".avi", ".mov", ".flv"],
+        "musics": [".mp3", ".wav", ".aac", ".flac"],
+        "archives": [".zip", ".tgz", ".rar", ".tar", ".7z"],
+        "documents": [".pdf", ".docx", ".csv", ".xlsx", ".pptx", ".doc", ".ppt", ".xls", ".txt"],
+        "executables": [".msi", ".exe", ".sh", ".bat"],
+        "code": [".py", ".c", ".cpp", ".php", ".js", ".html", ".css", ".java"],
+        "others": []
+    }
 
-}
+    for category in extensions:
+        os.makedirs(os.path.join(dest_dir, category), exist_ok=True)
 
+    for file in files:
+        file_path = os.path.join(source_dir, file)
+        if os.path.isfile(file_path):
+            moved = False
+            for category, exts in extensions.items():
+                if any(file.lower().endswith(ext) for ext in exts):
+                    try:
+                        shutil.move(file_path, os.path.join(dest_dir, category, file))
+                        print(f"Moved: {file} -> {category}")
+                        moved = True
+                        break
+                    except Exception as e:
+                        print(f"Error moving {file}: {e}")
+            if not moved:
+                shutil.move(file_path, os.path.join(dest_dir, "others", file))
+                print(f"Moved: {file} -> others")
 
-#sort to specific folder depend on extenstions
-def sorting(file):
-    keys = list(extentions.keys())
-    for key in keys:
-        for ext in extentions[key]:
-            # print(ext)
-            if file.endswith(ext):
-                return key
-
-
-#iterat through each file
-for file in files:
-    dist = sorting(file)
-    if dist:
-        try:
-            shutil.move(file, "../download-sorting/" + dist)
-        except:
-            print(file + " is already exist")
-    else:
-        try:
-            shutil.move(file, "../download-sorting/others")
-        except:
-            print(file + " is already exist")
+if __name__ == "__main__":
+    source = input("Enter source folder path: ")
+    dest = input("Enter destination folder path: ")
+    organize_downloads(source, dest)

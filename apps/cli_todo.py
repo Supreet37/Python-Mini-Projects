@@ -1,80 +1,172 @@
-import click
+# cli_todo.py - No external dependencies
+import os
+import sys
+import json
 
-@click.group()
-@click.pass_context
-def todo(ctx):
-    '''Simple CLI Todo App'''
-    ctx.ensure_object(dict)
-    #Open todo.txt – first line contains latest ID, rest contain tasks and IDs
-    with open('./todo.txt') as f:
-        content = f.readlines()
-    #Transfer data from todo.txt to the context
-    ctx.obj['LATEST'] = int(content[:1][0])
-    ctx.obj['TASKS'] = {en.split('```
+TODO_FILE = 'todo.json'
 
-')[0]:en.split('
-
-```')[1][:-1] for en in content[1:]}
-
-@todo.command()
-@click.pass_context
-def tasks(ctx):
-    '''Display tasks'''
-    if ctx.obj['TASKS']:
-        click.echo('YOUR TASKS\n**********')
-        #Iterate through all the tasks stored in the context
-        for i, task in ctx.obj['TASKS'].items():
-            click.echo('• ' + task + ' (ID: ' + i + ')')
-        click.echo('')
-    else:
-        click.echo('No tasks yet! Use ADD to add one.\n')
-
-@todo.command()
-@click.pass_context
-@click.option('-add', '--add_task', prompt='Enter task to add')
-def add(ctx, add_task):
-    '''Add a task'''
-    if add_task:
-        #Add task to list in context 
-        ctx.obj['TASKS'][ctx.obj['LATEST']] = add_task
-        click.echo('Added task "' + add_task + '" with ID ' + str(ctx.obj['LATEST']))
-        #Open todo.txt and write current index and tasks with IDs (separated by " ```
-{% endraw %}
- ")
-        curr_ind = [str(ctx.obj['LATEST'] + 1)] 
-        tasks = [str(i) + '
-{% raw %}
-```' + t for (i, t) in ctx.obj['TASKS'].items()]
-        with open('./todo.txt', 'w') as f:
-            f.writelines(['%s\n' % en for en in curr_ind + tasks])
-
-@todo.command()
-@click.pass_context
-@click.option('-fin', '--fin_taskid', prompt='Enter ID of task to finish', type=int)
-def done(ctx, fin_taskid):
-    '''Delete a task by ID'''
-    #Find task with associated ID
-    if str(fin_taskid) in ctx.obj['TASKS'].keys():
-        task = ctx.obj['TASKS'][str(fin_taskid)]
-        #Delete task from task list in context
-        del ctx.obj['TASKS'][str(fin_taskid)]
-        click.echo('Finished and removed task "' + task + '" with id ' + str(fin_taskid))
-        #Open todo.txt and write current index and tasks with IDs (separated by " ```
-{% endraw %}
- ")
-        if ctx.obj['TASKS']:
-            curr_ind = [str(ctx.obj['LATEST'] + 1)] 
-            tasks = [str(i) + '
-{% raw %}
-```' + t for (i, t) in ctx.obj['TASKS'].items()]
-            with open('./todo.txt', 'w') as f:
-                f.writelines(['%s\n' % en for en in curr_ind + tasks])
+class TodoApp:
+    def __init__(self):
+        self.tasks = {}
+        self.next_id = 1
+        self.load_tasks()
+    
+    def load_tasks(self):
+        """Load tasks from JSON file"""
+        if os.path.exists(TODO_FILE):
+            try:
+                with open(TODO_FILE, 'r') as f:
+                    data = json.load(f)
+                    self.tasks = data.get('tasks', {})
+                    self.next_id = data.get('next_id', 1)
+            except:
+                self.tasks = {}
+                self.next_id = 1
+    
+    def save_tasks(self):
+        """Save tasks to JSON file"""
+        with open(TODO_FILE, 'w') as f:
+            json.dump({
+                'tasks': self.tasks,
+                'next_id': self.next_id
+            }, f, indent=2)
+    
+    def add_task(self, description):
+        """Add a new task"""
+        task_id = self.next_id
+        self.tasks[task_id] = {
+            'id': task_id,
+            'description': description,
+            'status': 'pending'
+        }
+        self.next_id += 1
+        self.save_tasks()
+        print(f"✓ Added task #{task_id}: {description}")
+    
+    def list_tasks(self, filter_status=None):
+        """List all tasks"""
+        if not self.tasks:
+            print("\n📝 No tasks yet! Use 'add' to create one.\n")
+            return
+        
+        print("\n" + "="*60)
+        print("YOUR TASKS")
+        print("="*60)
+        
+        for task_id, task in self.tasks.items():
+            if filter_status and task['status'] != filter_status:
+                continue
+            
+            status_icon = "✓" if task['status'] == 'completed' else "○"
+            print(f"{status_icon} [{task_id}] {task['description']}")
+        
+        print("="*60 + "\n")
+    
+    def complete_task(self, task_id):
+        """Mark a task as completed"""
+        if task_id in self.tasks:
+            self.tasks[task_id]['status'] = 'completed'
+            self.save_tasks()
+            print(f"✓ Completed task #{task_id}: {self.tasks[task_id]['description']}")
         else:
-            #Resets ID tracker to 0 if list is empty
-            with open('./todo.txt', 'w') as f:
-                f.writelines([str(0) + '\n'])
-    else:
-        click.echo('Error: no task with id ' + str(fin_taskid))
+            print(f"✗ Error: Task #{task_id} not found")
+    
+    def delete_task(self, task_id):
+        """Delete a task"""
+        if task_id in self.tasks:
+            description = self.tasks[task_id]['description']
+            del self.tasks[task_id]
+            self.save_tasks()
+            print(f"✓ Deleted task #{task_id}: {description}")
+        else:
+            print(f"✗ Error: Task #{task_id} not found")
+    
+    def show_help(self):
+        """Show help menu"""
+        print("\n" + "="*60)
+        print("CLI TODO APP - COMMANDS")
+        print("="*60)
+        print("  add <task>        - Add a new task")
+        print("  list              - List all tasks")
+        print("  pending           - List only pending tasks")
+        print("  completed         - List only completed tasks")
+        print("  done <id>         - Mark task as completed")
+        print("  delete <id>       - Delete a task")
+        print("  clear             - Delete all tasks")
+        print("  help              - Show this help menu")
+        print("  exit / quit       - Exit the app")
+        print("="*60 + "\n")
 
-if __name__ == '__main__':
-    todo()
+def main():
+    app = TodoApp()
+    
+    print("CLI TODO APPLICATION")
+    app.show_help()
+    
+    while True:
+        try:
+            command = input("todo> ").strip().lower()
+            
+            if not command:
+                continue
+            
+            # Parse command and arguments
+            parts = command.split(maxsplit=1)
+            cmd = parts[0]
+            arg = parts[1] if len(parts) > 1 else None
+            
+            if cmd in ['exit', 'quit', 'q']:
+                print("\n👋 Goodbye!\n")
+                break
+            
+            elif cmd == 'add':
+                if arg:
+                    app.add_task(arg)
+                else:
+                    print("✗ Usage: add <task description>")
+            
+            elif cmd == 'list':
+                app.list_tasks()
+            
+            elif cmd == 'pending':
+                app.list_tasks('pending')
+            
+            elif cmd == 'completed':
+                app.list_tasks('completed')
+            
+            elif cmd == 'done':
+                if arg and arg.isdigit():
+                    app.complete_task(int(arg))
+                else:
+                    print("✗ Usage: done <task_id>")
+            
+            elif cmd == 'delete':
+                if arg and arg.isdigit():
+                    confirm = input(f"⚠️  Delete task #{arg}? (y/n): ").lower()
+                    if confirm == 'y':
+                        app.delete_task(int(arg))
+                else:
+                    print("✗ Usage: delete <task_id>")
+            
+            elif cmd == 'clear':
+                confirm = input("⚠️  Delete ALL tasks? (y/n): ").lower()
+                if confirm == 'y':
+                    app.tasks = {}
+                    app.next_id = 1
+                    app.save_tasks()
+                    print("✓ All tasks deleted")
+            
+            elif cmd == 'help':
+                app.show_help()
+            
+            else:
+                print(f"✗ Unknown command: '{cmd}'. Type 'help' for available commands.")
+        
+        except KeyboardInterrupt:
+            print("\n\n👋 Goodbye!\n")
+            break
+        except Exception as e:
+            print(f"✗ Error: {e}")
+
+if __name__ == "__main__":
+    main()
